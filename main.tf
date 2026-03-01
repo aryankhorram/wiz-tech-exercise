@@ -117,7 +117,8 @@ resource "aws_instance" "mongo" {
   key_name                    = "wiz-exercise"
   tags                        = { Name = "mongo-vm" }
   user_data = templatefile("${path.module}/user_data.sh", {
-    MONGO_USER = var.mongo_admin_user
-    MONGO_PASS = var.mongo_admin_password
+    MONGO_USER    = var.mongo_admin_user
+    MONGO_PASS    = var.mongo_admin_password
+    BACKUP_BUCKET = var.backup_bucket_name
   })
 }

@@ -32,3 +32,8 @@ variable "mongo_admin_password" {
   type    = string
   default = "PaZZW0123334"
 }
+
+variable "backup_bucket_name" {
+  type        = string
+  description = "S3 bucket"
+}

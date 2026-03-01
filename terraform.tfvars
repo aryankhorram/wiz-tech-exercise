@@ -1,0 +1,1 @@
+backup_bucket_name = "wiz-exercise-testings3bucket"

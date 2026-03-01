@@ -25,3 +25,23 @@ mongosh --quiet --eval "db=db.getSiblingDB('admin'); if (db.getUser('${MONGO_USE
 echo -e "\nsecurity:\n  authorization: enabled" | tee -a /etc/mongod.conf >/dev/null
 
 systemctl restart mongod
+
+yum -y install awscli
+
+# backup script
+cat > /usr/local/bin/mongo_backup.sh <<EOF
+#!/bin/bash
+DATE=\$(date +%F-%H-%M)
+mongodump --username ${MONGO_USER} --password ${MONGO_PASS} --authenticationDatabase admin --out /tmp/backup-\$DATE
+tar -czf /tmp/backup-\$DATE.tgz /tmp/backup-\$DATE
+aws s3 cp /tmp/backup-\$DATE.tgz s3://${BACKUP_BUCKET}/
+rm -rf /tmp/backup-\$DATE /tmp/backup-\$DATE.tgz
+EOF
+
+chmod +x /usr/local/bin/mongo_backup.sh
+
+# run once at boot 
+/usr/local/bin/mongo_backup.sh
+
+# schedule daily at 9pm 
+(crontab -l 2>/dev/null; echo "0 21 * * * /usr/local/bin/mongo_backup.sh") | crontab -
