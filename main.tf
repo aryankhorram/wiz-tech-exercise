@@ -6,12 +6,12 @@ resource "aws_vpc" "wiz_vpc" {
   cidr_block           = var.vpc_cidr
   enable_dns_support   = true
   enable_dns_hostnames = true
-  tags                 = { Name = "wiz-vpc" }
+  tags = {Name = "wiz-vpc" }
 }
 
 resource "aws_internet_gateway" "igw" {
   vpc_id = aws_vpc.wiz_vpc.id
-  tags   = { Name = "wiz-igw" }
+  tags = {Name = "wiz-igw"}
 }
 
 resource "aws_subnet" "public_subnet" {
@@ -19,14 +19,14 @@ resource "aws_subnet" "public_subnet" {
   cidr_block              = var.public_subnet_cidr
   availability_zone       = data.aws_availability_zones.available.names[0]
   map_public_ip_on_launch = true
-  tags                    = { Name = "wiz-public-subnet" }
+  tags = {Name = "wiz-public-subnet"}
 }
 
 resource "aws_subnet" "private_subnet" {
   vpc_id            = aws_vpc.wiz_vpc.id
   cidr_block        = var.private_subnet_cidr
   availability_zone = data.aws_availability_zones.available.names[0]
-  tags              = { Name = "wiz-private-subnet" }
+  tags = {Name = "wiz-private-subnet"}
 }
 
 resource "aws_route_table" "public_rt" {
@@ -36,7 +36,7 @@ resource "aws_route_table" "public_rt" {
     cidr_block = "0.0.0.0/0"
     gateway_id = aws_internet_gateway.igw.id
   }
-  tags = { Name = "wiz-public-rt" }
+  tags = {Name = "wiz-public-rt"}
 }
 
 resource "aws_route_table_association" "public_assoc" {
@@ -88,17 +88,17 @@ resource "aws_iam_role" "mongo_role" {
 }
 
 resource "aws_iam_role_policy_attachment" "mongo_admin_attach" {
-  role       = aws_iam_role.mongo_role.name
+  role = aws_iam_role.mongo_role.name
   policy_arn = "arn:aws:iam::aws:policy/AdministratorAccess"
 }
 
 resource "aws_iam_instance_profile" "mongo_profile" {
   name = "mongo-vm-profile"
-  role = aws_iam_role.mongo_role.name
+  role = aws_iam_role.mongo_vm_role.name
 }
 
 data "aws_ami" "amzn2" {
-  owners      = ["amazon"]
+  owners = ["amazon"]
   most_recent = true
 
   filter {
@@ -108,16 +108,11 @@ data "aws_ami" "amzn2" {
 }
 
 resource "aws_instance" "mongo" {
-  ami                         = data.aws_ami.amzn2.id
-  instance_type               = "t3.micro"
-  subnet_id                   = aws_subnet.public_subnet.id
-  iam_instance_profile        = aws_iam_instance_profile.mongo_profile.name
-  vpc_security_group_ids      = [aws_security_group.mongo_sg.id]
+  ami                    = data.aws_ami.amazon_linux_2.id
+  instance_type          = "t3.micro"
+  subnet_id              = aws_subnet.public_subnet.id
+  iam_instance_profile   = aws_iam_instance_profile.mongo_vm_profile.name
+  vpc_security_group_ids = [aws_security_group.mongo_sg.id]
   associate_public_ip_address = true
-  key_name                    = "wiz-exercise"
-  tags                        = { Name = "mongo-vm" }
-  user_data = templatefile("${path.module}/user_data.sh", {
-    MONGO_USER = var.mongo_admin_user
-    MONGO_PASS = var.mongo_admin_password
-  })
+  tags = { Name = "mongo-vm"}
 }

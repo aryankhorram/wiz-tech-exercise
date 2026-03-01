@@ -21,3 +21,14 @@ variable "private_subnet_cidr" {
   type        = string
   default     = "10.0.2.0/24"
 }
+
+variable "mongo_admin_user" {
+  description = "Creation of terraform input variable"
+  type        = string
+  default     = "admin"
+}
+
+variable "mongo_admin_password" {
+  type    = string
+  default = "PaZZW0123334"
+}
