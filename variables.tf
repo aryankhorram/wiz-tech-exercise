@@ -37,3 +37,19 @@ variable "backup_bucket_name" {
   type        = string
   description = "S3 bucket"
 }
+
+variable "public_subnet2_cidr" {
+  type        = string
+  description = "CIDR - Public Subnet AZ2"
+  default     = "10.0.3.0/24"
+}
+
+variable "private_subnet2_cidr" {
+  type        = string
+  description = "CIDR - Private Subnet AZ2"
+  default     = "10.0.4.0/24"
+}
+
+variable "jr_tasky_image" {
+  type = string
+}

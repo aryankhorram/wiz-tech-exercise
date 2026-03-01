@@ -19,14 +19,20 @@ resource "aws_subnet" "public_subnet" {
   cidr_block              = var.public_subnet_cidr
   availability_zone       = data.aws_availability_zones.available.names[0]
   map_public_ip_on_launch = true
-  tags                    = { Name = "wiz-public-subnet" }
+  tags = {
+    Name                     = "wiz-public-subnet"
+    "kubernetes.io/role/elb" = "1"
+  "kubernetes.io/cluster/wiz-eks" = "shared" }
 }
 
 resource "aws_subnet" "private_subnet" {
   vpc_id            = aws_vpc.wiz_vpc.id
   cidr_block        = var.private_subnet_cidr
   availability_zone = data.aws_availability_zones.available.names[0]
-  tags              = { Name = "wiz-private-subnet" }
+  tags = {
+    Name                              = "wiz-private-subnet"
+    "kubernetes.io/role/internal-elb" = "1"
+  "kubernetes.io/cluster/wiz-eks" = "shared" }
 }
 
 resource "aws_route_table" "public_rt" {
@@ -121,4 +127,40 @@ resource "aws_instance" "mongo" {
     MONGO_PASS    = var.mongo_admin_password
     BACKUP_BUCKET = var.backup_bucket_name
   })
+}
+
+resource "aws_subnet" "public_subnet_az2" {
+  vpc_id                  = aws_vpc.wiz_vpc.id
+  cidr_block              = var.public_subnet2_cidr
+  availability_zone       = data.aws_availability_zones.available.names[1]
+  map_public_ip_on_launch = true
+
+  tags = {
+    Name                            = "wiz-public-subnet-az2"
+    "kubernetes.io/role/elb"        = "1"
+    "kubernetes.io/cluster/wiz-eks" = "shared"
+  }
+}
+
+resource "aws_subnet" "private_subnet_az2" {
+  vpc_id            = aws_vpc.wiz_vpc.id
+  cidr_block        = var.private_subnet2_cidr
+  availability_zone = data.aws_availability_zones.available.names[1]
+
+  tags = {
+    Name                              = "wiz-private-subnet-az2"
+    "kubernetes.io/role/internal-elb" = "1"
+    "kubernetes.io/cluster/wiz-eks"   = "shared"
+  }
+}
+
+resource "aws_route_table_association" "public_assoc_az2" {
+  subnet_id      = aws_subnet.public_subnet_az2.id
+  route_table_id = aws_route_table.public_rt.id
+}
+
+resource "aws_route_table_association" "wiz_private_route_table_association_az2" {
+  subnet_id      = aws_subnet.private_subnet_az2.id
+  route_table_id = aws_route_table.wiz_private_route_table.id
+
 }
