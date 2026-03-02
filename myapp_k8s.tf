@@ -30,12 +30,22 @@ resource "kubernetes_deployment" "jr_tasky_deploy" {
       }
 
       spec {
-        container {
+                container {
           name  = "jr-tasky-container"
           image = var.jr_tasky_image
 
           port {
             container_port = 8080
+          }
+
+          env {
+            name  = "MONGODB_URI"
+            value = "mongodb://admin:PaZZW0123334@10.0.1.52:27017/admin"
+          }
+
+          env {
+            name  = "SECRET_KEY"
+            value = "supersecretkey"
           }
         }
       }
